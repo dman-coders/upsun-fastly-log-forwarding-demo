@@ -8,8 +8,7 @@ applications:
         - "php@8.4"
       packages:
         - "ffmpeg"
-#      packages:
-#        - "goaccess"
+        - "goaccess"
 
     build:
       flavor: none

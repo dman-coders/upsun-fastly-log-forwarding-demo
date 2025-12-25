@@ -2,7 +2,13 @@
 # AI can make mistakes. Please modify this file to suit your needs.
 applications:
   app:
-    type: php:8.5
+    type: "composable:25.11"
+    stack:
+      runtimes:
+        - "php@8.4":
+      packages:
+        - goaccess
+
     build:
       flavor: none
     hooks:

@@ -20,6 +20,9 @@ applications:
         /:
           root: web
           passthru: /index.php
+        /logs:
+          root: logs
+          passthru: /fastly.log
     mounts:
       'logs':
         source: storage

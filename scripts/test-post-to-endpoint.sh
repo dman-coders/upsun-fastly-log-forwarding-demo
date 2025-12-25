@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 # Make a dummy POST to our log consumer.
 
-BASE_URL=$(upsun environment:url --primary --pipe)
-ENDPOINT_URL="${BASE_URL}log-receiver.php"
+LOG_RECEIVER_URL=$(upsun environment:url --primary --pipe)
+ENDPOINT_URL="${LOG_RECEIVER_URL}log-receiver.php"
 
 echo "Posting to endpoint URL: ${ENDPOINT_URL}"
 

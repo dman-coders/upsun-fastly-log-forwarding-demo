@@ -7,7 +7,6 @@ applications:
       runtimes:
         - "php@8.4"
       packages:
-        - "ffmpeg"
         - "goaccess"
 
     build:
@@ -20,11 +19,17 @@ applications:
         /:
           root: web
           passthru: /index.php
+
+        /well-known/fastly/logging/challenge:
+          allow: true
+          root: web/.well-known/fastly/logging/challenge
+
         /logs:
           root: logs
           passthru: true
           headers:
             Content-Type: text/plain
+
     mounts:
       'logs':
         source: storage

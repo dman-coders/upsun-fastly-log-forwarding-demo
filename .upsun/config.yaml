@@ -6,6 +6,8 @@ applications:
     stack:
       runtimes:
         - "php@8.4"
+      packages:
+        - "ffmpeg"
 #      packages:
 #        - "goaccess"
 

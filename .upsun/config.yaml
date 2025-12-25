@@ -1,0 +1,27 @@
+# Upsun configuration, generated using AI at: 2025-12-25T14:57:44+07:00
+# AI can make mistakes. Please modify this file to suit your needs.
+applications:
+  app:
+    type: php:8.5
+    build:
+      flavor: none
+    hooks:
+      build: |
+        set -ex
+    web:
+      locations:
+        /:
+          root: web
+          passthru: /index.php
+    mounts:
+      'logs':
+        source: storage
+        source_path: logs
+
+    relationships: {}
+
+# Single PHP app detected with no additional services or complex configuration.
+# Using latest PHP 8.5 runtime from Registry.
+# Composer install in build hook for dependency management.
+# Default web root and passthru for PHP-FPM.
+# No services or routes explicitly defined, default route will be used.

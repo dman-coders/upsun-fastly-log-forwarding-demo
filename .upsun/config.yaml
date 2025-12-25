@@ -22,7 +22,9 @@ applications:
           passthru: /index.php
         /logs:
           root: logs
-          passthru: /fastly.log
+          passthru: true
+          headers:
+            Content-Type: text/plain
     mounts:
       'logs':
         source: storage

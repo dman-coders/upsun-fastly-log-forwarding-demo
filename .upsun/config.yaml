@@ -18,6 +18,7 @@ applications:
       locations:
         /well-known/fastly/logging/:
           allow: true
+          scripts: false
           root: web/.well-known/fastly/logging/
 
         /:

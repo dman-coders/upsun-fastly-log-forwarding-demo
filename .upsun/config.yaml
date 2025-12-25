@@ -5,9 +5,9 @@ applications:
     type: "composable:25.11"
     stack:
       runtimes:
-        - "php:8.4"
-      packages:
-        - "goaccess"
+        - "php@8.4"
+#      packages:
+#        - "goaccess"
 
     build:
       flavor: none

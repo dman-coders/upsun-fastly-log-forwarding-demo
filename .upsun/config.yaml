@@ -16,13 +16,13 @@ applications:
         set -ex
     web:
       locations:
+        /well-known/fastly/logging/:
+          allow: true
+          root: web/.well-known/fastly/logging/
+
         /:
           root: web
           passthru: /index.php
-
-        /well-known/fastly/logging/challenge:
-          allow: true
-          root: web/.well-known/fastly/logging/challenge
 
         /logs:
           root: logs

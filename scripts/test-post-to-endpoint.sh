@@ -1,5 +1,4 @@
-#!/bin/env bash
-
+#!/usr/bin/env bash
 # Make a dummy POST to our log consumer.
 
 BASE_URL=$(upsun environment:url --primary --pipe)

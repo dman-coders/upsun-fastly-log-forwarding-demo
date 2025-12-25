@@ -1,0 +1,100 @@
+/*
+ * Style sheet for the CSS3 specification,
+ * to be used in addition to http://www.w3.org/StyleSheets/TR/W3C-{WD,PR,REC}
+ */
+
+@media print {
+	html { margin: 0 !important }
+	body { font-family: serif }
+	th, td { font-family: inherit }
+	a { color: inherit !important }
+	div.example:before { font-family: serif !important }
+	pre.example:before { font-family: serif !important }
+	a:link, a:visited { text-decoration: none !important }
+	a:link:after, a:visited:after { /* create a cross-ref "see..." */ }
+}
+@page {
+	margin: 1.5cm 1.1cm;
+}
+
+body {
+	counter-reset: exampleno figure issue;
+	margin: 0 auto !important;
+}
+
+/* Pagination */
+h1, h2, h3, h4, h5, h6 { page-break-after: avoid }
+div.figure, div.sidefigure, pre, table.propdef, table.propdef-extra,
+div.example { page-break-inside: avoid }
+dt { page-break-after: avoid }
+
+span.id {float: right; font-weight: bold}
+
+/* General Structural Markup */
+h2, h3, h5, h6 { margin-top: 3em; }
+
+h1 + h2 { margin-top: 0; }
+
+h4 { margin-top: 4em; }
+
+p, div.note, div.issue {
+	margin-top: 1em;
+	margin-bottom: 1em;
+}
+
+dd > p:first-child, li > p:first-child, .note > p:first-child, .issue > p:first-child {
+	margin-top: 0
+}
+
+pre {
+	margin-top: 1em;
+	margin-bottom: 1em;
+}
+
+img {
+	border-style: none;
+	color: white;
+}
+.toc {
+}
+
+body {
+	line-height: 1.5;
+}
+
+a:link, a:visited {
+	color: inherit;
+	text-decoration: underline;
+}
+
+a.logo:link, a.logo:visited {
+	padding: 0;
+	border-style: none;
+}
+
+dl dd { margin: 0 0 1em 2em }
+ul, ol { margin-left: 0; padding-left: 2em; }
+li { margin: 0.25em 2em 0.5em 0; padding-left: 0 }
+
+dfn { font-weight: bolder; }
+
+/* Class note is a non-normative note. May be inline or a P or DIV */
+.note {
+	border-color: #52E052;
+	background: #E9FBE9;
+}
+
+s, del {text-decoration: line-through; color: red}
+u, ins {text-decoration: underline; background: #bfa}
+
+dd { margin-left: 2em }
+
+sup {
+	vertical-align: super;
+	font-size: 80%
+}
+
+blockquote {
+	margin: 0.5em 4em 0.5em 2em;
+	text-indent: 0;
+}

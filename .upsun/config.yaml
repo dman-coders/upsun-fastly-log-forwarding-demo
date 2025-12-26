@@ -47,6 +47,7 @@ applications:
 
     relationships: {}
 
+
 # Single PHP app detected with no additional services or complex configuration.
 # Using latest PHP 8.5 runtime from Registry.
 # Composer install in build hook for dependency management.

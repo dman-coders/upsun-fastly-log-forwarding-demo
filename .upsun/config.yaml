@@ -16,14 +16,15 @@ applications:
         set -ex
     web:
       locations:
-        /well-known/fastly/logging/:
-          allow: true
-          scripts: false
-          root: web/.well-known/fastly/logging/
-
         /:
           root: web
           passthru: /index.php
+
+        /reports/:
+          root: web/reports
+          allow: true
+          index:
+            - "index.html"
 
         /logs:
           root: logs
@@ -31,10 +32,18 @@ applications:
           headers:
             Content-Type: text/plain
 
+        /well-known/fastly/logging/:
+          allow: true
+          scripts: false
+          root: web/.well-known/fastly/logging/
+
     mounts:
       'logs':
         source: storage
         source_path: logs
+      'web/reports':
+        source: storage
+        source_path: reports
 
     relationships: {}
 

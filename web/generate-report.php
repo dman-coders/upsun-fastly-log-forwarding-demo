@@ -1,5 +1,5 @@
 <?php
-
+$PLATFORM_DIR = getenv('PLATFORM_DIR');
 shell_exec("goaccess $PLATFORM_DIR/logs/fastly.log --log-format=COMBINED -o $PLATFORM_DIR/web/reports/index.html");
 
 # Once this process is complete, return an image for success

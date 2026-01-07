@@ -33,7 +33,7 @@ if [ -z "${FASTLY_LOG_TYPE}" ]; then
   log_message "No FASTLY_LOG_TYPE specified. Available log rule types currently active for service ${FASTLY_API_SERVICE} (version ${CURRENT_VERSION}):"
   curl -s -H "Fastly-Key: ${FASTLY_API_TOKEN}" \
        -H "Accept: application/json" \
-       "${FASTLY_API_URL}/service/${FASTLY_API_SERVICE}/details" | jq -r '.active_version | to_entries | .[] | select(.value | type == "array" and any(.[]; .format != null and .format != "")) | .key'
+       "${FASTLY_API_URL}/service/${FASTLY_API_SERVICE}/details" | jq -r '.active_version | to_entries | .[] | select(.value | type == "array" and any(.[]; .format != null and .format != "")) | .key' >&2
   log_message "Please define the FASTLY_LOG_TYPE and run this again. EG 'export FASTLY_LOG_TYPE=newrelics'"
 fi
 
@@ -41,7 +41,7 @@ if [ -z "${FASTLY_LOG_RULE}" ]; then
   log_message "No FASTLY_LOG_RULE specified. Available log rules currently active for service ${FASTLY_API_SERVICE} (version ${CURRENT_VERSION}):"
   curl -s -H "Fastly-Key: ${FASTLY_API_TOKEN}" \
        -H "Accept: application/json" \
-       "${FASTLY_API_URL}/service/${FASTLY_API_SERVICE}/details" | jq -r '.active_version | .[] | arrays | .[] | select(.format != null and .format != "") | .name'
+       "${FASTLY_API_URL}/service/${FASTLY_API_SERVICE}/details" | jq -r '.active_version | .[] | arrays | .[] | select(.format != null and .format != "") | .name' >&2
   log_message "Please define the FASTLY_LOG_RULE and run this again. EG 'export FASTLY_LOG_RULE=my_log_rule_name'"
   exit 0
 fi
@@ -49,12 +49,12 @@ fi
 log_message "Listing Fastly log format for the fastly log rule named: '$FASTLY_LOG_RULE' :"
 curl -s -H "Fastly-Key: ${FASTLY_API_TOKEN}" \
      -H "Accept: application/json" \
-     "${FASTLY_API_URL}/service/${FASTLY_API_SERVICE}/details" | jq --arg name "$FASTLY_LOG_RULE" '.active_version | .[] | arrays | .[] | select(.name == $name) | .format'
+     "${FASTLY_API_URL}/service/${FASTLY_API_SERVICE}/details" | jq -r --arg name "$FASTLY_LOG_RULE" '.active_version | .[] | arrays | .[] | select(.name == $name) | .format'
 
 ####
 log_message "To update the format, you can use the Fastly API with the following actions."
 
-cat << 'EOF'
+cat >&2 << 'EOF'
 
 # Preamble:
 # Ensure FASTLY_API_URL, FASTLY_API_SERVICE, FASTLY_API_TOKEN are set for your service.

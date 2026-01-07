@@ -1,0 +1,96 @@
+#!/usr/bin/env bash
+
+# Utlity to retrieve the log format for a given Fastly log rule.
+
+# Requires $PLATFORM_PROJECT to be set
+# Requires $PLATFORM_BRANCH to be set
+# Will require the log rule type and name to be set, or will list available log rules
+#
+# This first retrieves your projects Fastly API credentials from the Upsun project,
+# then interacts with the Fastly API to retrieve details.
+# See https://support.platform.sh/hc/en-us/community/posts/32183119232018 for a short tutorial.
+# Reference https://www.fastly.com/documentation/guides/integrations/streaming-logs/useful-variables-to-log/
+
+PLATFORM_CLI=${PLATFORM_CLI:-upsun}
+export verbose=true
+log_message() { $verbose && >&2 echo -e "$@"; }
+
+log_message "Fetching Fastly credentials for project ${PLATFORM_PROJECT}/${PLATFORM_BRANCH} from PSH project environment ..."
+FASTLY_API_SERVICE=${FASTLY_API_SERVICE:-$(${PLATFORM_CLI} ssh "echo \$FASTLY_API_SERVICE" | sed -e 's/[[:space:]]//g')}
+FASTLY_API_TOKEN=${FASTLY_API_TOKEN:-$(${PLATFORM_CLI} ssh "echo \$FASTLY_API_TOKEN" | sed -e 's/[[:space:]]//g')}
+FASTLY_API_URL="https://api.fastly.com"
+
+log_message "Listing current Fastly log forwarding rules for service ID ${FASTLY_SERVICE_ID} ..."
+
+# Need to Identify current active version first.
+CURRENT_VERSION=$(curl -s -H "Fastly-Key: $FASTLY_API_TOKEN" \
+  "${FASTLY_API_URL}/service/${FASTLY_API_SERVICE}/details" \
+  | jq -r ".active_version.number")
+log_message "Current service version for FASTLY_API_SERVICE=${FASTLY_API_SERVICE} is CURRENT_VERSION=$CURRENT_VERSION "
+
+# If the FASTLY_LOG_RULE name is not set, enumerate the available rule types, rules and then exit.
+if [ -z "${FASTLY_LOG_TYPE}" ]; then
+  log_message "No FASTLY_LOG_TYPE specified. Available log rule types currently active for service ${FASTLY_API_SERVICE} (version ${CURRENT_VERSION}):"
+  curl -s -H "Fastly-Key: ${FASTLY_API_TOKEN}" \
+       -H "Accept: application/json" \
+       "${FASTLY_API_URL}/service/${FASTLY_API_SERVICE}/details" | jq -r '.active_version | to_entries | .[] | select(.value | type == "array" and any(.[]; .format != null and .format != "")) | .key'
+  log_message "Please define the FASTLY_LOG_TYPE and run this again. EG 'export FASTLY_LOG_TYPE=newrelics'"
+fi
+
+if [ -z "${FASTLY_LOG_RULE}" ]; then
+  log_message "No FASTLY_LOG_RULE specified. Available log rules currently active for service ${FASTLY_API_SERVICE} (version ${CURRENT_VERSION}):"
+  curl -s -H "Fastly-Key: ${FASTLY_API_TOKEN}" \
+       -H "Accept: application/json" \
+       "${FASTLY_API_URL}/service/${FASTLY_API_SERVICE}/details" | jq -r '.active_version | .[] | arrays | .[] | select(.format != null and .format != "") | .name'
+  log_message "Please define the FASTLY_LOG_RULE and run this again. EG 'export FASTLY_LOG_RULE=my_log_rule_name'"
+  exit 0
+fi
+
+log_message "Listing Fastly log format for the fastly log rule named: '$FASTLY_LOG_RULE' :"
+curl -s -H "Fastly-Key: ${FASTLY_API_TOKEN}" \
+     -H "Accept: application/json" \
+     "${FASTLY_API_URL}/service/${FASTLY_API_SERVICE}/details" | jq --arg name "$FASTLY_LOG_RULE" '.active_version | .[] | arrays | .[] | select(.name == $name) | .format'
+
+####
+log_message "To update the format, you can use the Fastly API with the following actions."
+
+cat << 'EOF'
+
+# Preamble:
+# Ensure FASTLY_API_URL, FASTLY_API_SERVICE, FASTLY_API_TOKEN are set for your service.
+# Ensure your FASTLY_LOG_TYPE and FASTLY_LOG_RULE are set.
+# eg FASTLY_LOG_TYPE='bigqueries; FASTLY_LOG_RULE='psh-bigquery'
+
+# Clone the current service for editing
+CURRENT_VERSION=$(curl -s -H "Fastly-Key: $FASTLY_API_TOKEN" \
+  "${FASTLY_API_URL}/service/${FASTLY_API_SERVICE}/details" \
+  | jq -r ".active_version.number")
+NEW_VERSION=$(curl -s -X PUT -H "Fastly-Key: $FASTLY_API_TOKEN" \
+  "${FASTLY_API_URL}/service/${FASTLY_API_SERVICE}/version/${CURRENT_VERSION}/clone" \
+  | jq -r ".number")
+
+# Define a new format
+LOG_FORMAT="{\n  \"timestamp\": \"%{time.start.msec}\",\n \"request\":\"%{req.request}\"\n }"
+
+UPDATED=$(curl -s -X POST \-+
+  -H "Fastly-Key: $FASTLY_API_TOKEN" \
+  -H 'Content-Type: application/x-www-form-urlencoded' \
+  -H 'Accept: application/json' \
+  "${FASTLY_API_URL}/service/${FASTLY_API_SERVICE}/version/${NEW_VERSION}/logging/$FASTLY_LOG_TYPE" \
+  -d 'name=$FASTLY_LOG_RULE' \
+  -d 'method=POST' \
+  --data-urlencode "format=$LOG_FORMAT" \
+  -d 'format_version=2'
+)
+curl -s -X PUT -H "Fastly-Key: $FASTLY_API_TOKEN" \
+  "${FASTLY_API_URL}/service/${FASTLY_API_SERVICE}/version/${NEW_VERSION}" \
+  -d "comment=Updated log forwarding format" \
+  | jq -r ".comment"
+
+# Activate the new version
+curl -s -X PUT -H "Fastly-Key: $FASTLY_API_TOKEN" \
+  "${FASTLY_API_URL}/service/${FASTLY_API_SERVICE}/version/${NEW_VERSION}/activate" \
+  | jq -r ".number,.active"
+
+
+EOF
